@@ -18,4 +18,5 @@ Display search results with all available information from the CSV, including ca
 
 Sort results by key criteria such as trip duration and price for easy comparison.
 
-Run the code from project folder: javac -d out $(find src -name "*.java") java -cp out com.railwaysearch.app.Main
+Run the code from project folder in Vscode: javac -d out $(find src -name "*.java") java -cp out 
+com.railwaysearch.app.Main
