@@ -17,3 +17,5 @@ Search for connections between cities based on parameters such as departure city
 Display search results with all available information from the CSV, including calculated trip duration.
 
 Sort results by key criteria such as trip duration and price for easy comparison.
+
+Run the code from project folder: javac -d out $(find src -name "*.java") java -cp out com.railwaysearch.app.Main
