@@ -1,0 +1,17 @@
+# Java class files
+*.class
+
+# VS Code settings
+.vscode/
+
+# Eclipse files
+*.project
+*.classpath
+.settings/
+
+# Mac OS metadata
+.DS_Store
+
+# CSV backups or temporary files
+*.csv~
+
