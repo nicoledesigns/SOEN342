@@ -4,7 +4,7 @@ import com.railwaysearch.repository.RouteRepository;
 import com.railwaysearch.util.CsvLoader;
 import com.railwaysearch.model.Route;
 import com.railwaysearch.model.TrainType;
-
+import java.util.List;
 
 public class Main {
 
@@ -20,7 +20,7 @@ public class Main {
 
         // 3️- Show total number of routes loaded
         System.out.println("\nTotal routes loaded: " + repo.size());
-
+/*
         // 4️- Example queries
         System.out.println("\n=== Routes departing from A Coruña ===");
         for (Route r : repo.findByDepartureCity("A Coruña")) {
@@ -36,6 +36,23 @@ public class Main {
         for (Route r : repo.findByTrainType(TrainType.RJX)) {
             System.out.println(r);
         }
+*/
+        System.out.println("\n=== Printing one stop");
+        for (List<Route> connection : repo.find1StopConnections("Drammen", "Helsinki")) {
+            System.out.println("Connection:");
+            for (Route r : connection) {
+                System.out.println("  " + r);
+            }
+        }
+
+        System.out.println("\n=== Printing two stop");
+        for (List<Route> connection : repo.find2StopConnections("Drammen", "Turku")) {
+            System.out.println("Connection:");
+            for (Route r : connection) {
+                System.out.println("  " + r);
+            }
+        }
+
 
         // 5️- Program finished
         System.out.println("\nDemo complete.");

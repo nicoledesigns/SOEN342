@@ -5,6 +5,7 @@ import com.railwaysearch.model.Route;
 import com.railwaysearch.model.TrainType;
 import java.util.ArrayList;
 import java.util.List;
+import com.railwaysearch.util.TimeUtils;
 
 public class RouteRepository {
 
@@ -59,10 +60,71 @@ public List<Route> findByTrainType(TrainType trainType) {
     }
     return results;
 }
+//Find direct routes between two cities
+    public List<Route> findDirectConnections(String departureCity, String arrivalCity) {
+        List<Route> results = new ArrayList<>();
+        List<Route> direct = new ArrayList<>();
+        for (Route route : routes) {
+            if ((route.getDepartureCity().equalsIgnoreCase(departureCity))&&(route.getArrivalCity().equals(arrivalCity))) {
+                direct.add(route);
+            }
+        }
+        results.addAll(direct);
+        return results;
+    }
+//Find indirect routes with 1 stop between two cities
+    public List<List<Route>> find1StopConnections(String departureCity, String arrivalCity) {
+        List<List<Route>> results = new ArrayList<>();
+        for (Route firstLeg : routes) {
+            if (firstLeg.getDepartureCity().equalsIgnoreCase(departureCity)) {
+                for (Route secondLeg : routes) {
+                    if (secondLeg.getDepartureCity().equalsIgnoreCase(firstLeg.getArrivalCity())
+                            && secondLeg.getArrivalCity().equalsIgnoreCase(arrivalCity)) {
+                        long wait = TimeUtils.getDurationMinutes(firstLeg.getArrivalTime(), secondLeg.getDepartureTime());
+                        if (wait >= 0) {
+                            List<Route> connection = new ArrayList<>();
+                            connection.add(firstLeg);
+                            connection.add(secondLeg);
+                            results.add(connection);
+                        }
+                    }
+                }
+            }
+        }
+        return results;
+    }
 
+    //Find indirect routes with 2 stops between two cities
+    public List<List<Route>> find2StopConnections(String departureCity, String arrivalCity) {
+        List<List<Route>> results = new ArrayList<>();
 
-    // Example: total number of routes loaded
+        for (Route firstLeg : routes) {
+            if (firstLeg.getDepartureCity().equalsIgnoreCase(departureCity)) {
+                // get all possible 1-stop journeys starting from firstLeg's arrival city
+                List<List<Route>> oneStops = find1StopConnections(firstLeg.getArrivalCity(), arrivalCity);
+
+                for (List<Route> oneStopConnection : oneStops) {
+                    Route secondLeg = oneStopConnection.get(0);
+                    long wait = TimeUtils.getDurationMinutes(firstLeg.getArrivalTime(), secondLeg.getDepartureTime());
+                    if (wait >= 0) {
+                        List<Route> connection = new ArrayList<>();
+                        connection.add(firstLeg);
+                        connection.addAll(oneStopConnection); // append the rest
+                        results.add(connection);
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
+        // Example: total number of routes loaded
     public int size() {
         return routes.size();
     }
+
+
+
 }
+
