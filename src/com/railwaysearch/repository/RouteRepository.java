@@ -3,9 +3,15 @@ package com.railwaysearch.repository;
 
 import com.railwaysearch.model.Route;
 import com.railwaysearch.model.TrainType;
+import com.railwaysearch.util.DayUtils;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.railwaysearch.util.TimeUtils;
+import java.time.DayOfWeek;
+import java.util.Set;
+
 
 public class RouteRepository {
 
@@ -123,8 +129,58 @@ public List<Route> findByTrainType(TrainType trainType) {
     public int size() {
         return routes.size();
     }
+    public List<Route> findRoutes(String departureCity, String arrivalCity, String departure_time, String arrival_time,
+    String train_type, String days_of_operation, double first_class, double second_class) 
+    {
+List<Route> results = new ArrayList<>();
+Set<DayOfWeek> days = DayUtils.multipleDay(days_of_operation);
 
+for (Route route : routes) {
 
+    boolean flag = true;
 
+    if (!departureCity.equals("") && !route.getDepartureCity().equalsIgnoreCase(departureCity)) {
+        flag = false;
+    }
+
+    if (!arrivalCity.equals("") && !route.getArrivalCity().equalsIgnoreCase(arrivalCity)) {
+        flag = false;
+    }
+
+    if (!departure_time.equals("") && !route.getDepartureTime().equalsIgnoreCase(departure_time)) {
+        flag = false;
+    }
+
+    if (!arrival_time.equals("") && !route.getArrivalTime().equalsIgnoreCase(arrival_time)) {
+        flag = false;
+    }
+
+    if (!train_type.equals("")) {
+        TrainType train = TrainType.valueOf(train_type.toUpperCase());
+        if (!route.getTrainType().equals(train)) {
+            flag = false;
+        }
+    }
+
+    Set<DayOfWeek> routeDay = DayUtils.multipleDay(route.getDaysOfOperation());
+
+    if(!days_of_operation.equals("") && Collections.disjoint(days,routeDay)){
+        flag = false;
+    }
+
+    if (first_class != 0 && (route.getFirstClassPrice() > first_class)) {
+        flag = false;
+    }
+
+    if (second_class != 0 && (route.getSecondClassPrice() > second_class)) {
+        flag = false;
+    }
+
+    if (flag) {
+        results.add(route);
+    }
+}
+return results;
+}
 }
 

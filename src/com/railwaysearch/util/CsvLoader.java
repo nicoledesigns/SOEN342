@@ -60,7 +60,7 @@ public class CsvLoader {
                 }
             }
 
-            System.out.println("CSV loading complete. Routes loaded: " + repo.size());
+ //           System.out.println("CSV loading complete. Routes loaded: " + repo.size());
 
         } catch (IOException e) {
             System.err.println("Failed to read CSV file: " + e.getMessage());
