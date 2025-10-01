@@ -80,6 +80,10 @@ public class Main {
         System.out.println("");
         // 3️- Show total number of routes loaded
         System.out.println("\nTotal routes loaded: " + repo.size());
+        
+        for (Route r : repo.findRoutes(departure_city, arrival_city, departure_time, arrival_time,train_type, days_of_operation, first_price, second_price)) {
+            System.out.println(r);
+        }
 /*
         // 4️- Example queries
 
