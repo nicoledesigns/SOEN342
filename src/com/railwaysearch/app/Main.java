@@ -6,6 +6,8 @@ import com.railwaysearch.model.Route;
 import com.railwaysearch.model.TrainType;
 import java.util.List;
 import java.util.Scanner;
+import com.railwaysearch.util.TimeUtils;
+
 
 
 
@@ -25,7 +27,7 @@ public class Main {
         CsvLoader.load("routes.csv", repo);
 
         System.out.println("\n\nWelcome to the European Train Connection Finder");
-
+     /*   
         System.out.println(
                 "Please enter your search criteria to search for a connection. You can skip any criteria by pressing Enter");
 
@@ -76,49 +78,16 @@ public class Main {
 
             }
         }
-
-        System.out.println("");
-        // 3️- Show total number of routes loaded
-        System.out.println("\nTotal routes loaded: " + repo.size());
-        
-        for (Route r : repo.findRoutes(departure_city, arrival_city, departure_time, arrival_time,train_type, days_of_operation, first_price, second_price)) {
-            System.out.println(r);
-        }
-/*
-        // 4️- Example queries
-
-        // System.out.println("\n=== Routes departing from A Coruña ===");
-        for (Route r : repo.findRoutes(departure_city, arrival_city, departure_time, arrival_time,train_type, days_of_operation, first_price, second_price)) {
-            System.out.println(r);
-        }
-
-        // System.out.println("\n=== Routes arriving at Santander ===");
-       // for (Route r : repo.findByArrivalCity("Santander")) {
-            // System.out.println(r);
-        //}
-
-        System.out.println("\n=== All RJX train type routes ===");
-        for (Route r : repo.findByTrainType(TrainType.RJX)) {
-            System.out.println(r);
-        }
-        */ 
+*/
         System.out.println("\n=== Printing one stop");
-        for (List<Route> connection : repo.find1StopConnections("Drammen", "Helsinki")) {
-            System.out.println("Connection:");
-            for (Route r : connection) {
-                System.out.println("  " + r);
-            }
-        }
+for (List<Route> connection : repo.find1StopConnections("Drammen", "Helsinki")) {
+    TimeUtils.printConnection(connection);  // <- prints legs + layovers + total duration
+}
 
-        System.out.println("\n=== Printing two stop");
-        for (List<Route> connection : repo.find2StopConnections("Drammen", "Turku")) {
-            System.out.println("Connection:");
-            for (Route r : connection) {
-                System.out.println("  " + r);
-            }
-        }
+System.out.println("\n=== Printing two stop");
+for (List<Route> connection : repo.find2StopConnections("Drammen", "Turku")) {
+    TimeUtils.printConnection(connection);  // <- prints legs + layovers + total duration
+}
 
-        // 5️- Program finished
-        // System.out.println("\nDemo complete.");
     }
 }
