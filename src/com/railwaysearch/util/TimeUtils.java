@@ -8,18 +8,26 @@ import com.railwaysearch.model.Route;
 
 public class TimeUtils {
 
+
     public static LocalTime parse(String timeStr) {
-        return LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("HH:mm"));
+        // Remove possible "(+1d)" and trim
+        String clean = timeStr.replaceAll("\\s*\\(\\+1d\\)", "").trim();
+        return LocalTime.parse(clean, DateTimeFormatter.ofPattern("HH:mm"));
     }
 
-public static int getDurationMinutes(String departure, String arrival) {
+    public static int getDurationMinutes(String departure, String arrival) {
+        boolean arrivalNextDay = arrival.contains("(+1d)");
+
         LocalTime dep = parse(departure);
         LocalTime arr = parse(arrival);
+
         int minutes = (int) Duration.between(dep, arr).toMinutes();
-        // If arrival is on the next day
-        if (minutes < 0) {
-            minutes += 24 * 60; // add 1440 minutes
+
+        // Add 24h if arrival is explicitly next day or negative
+        if (arrivalNextDay || minutes < 0) {
+            minutes += 24 * 60;
         }
+
         return minutes;
     }
 
