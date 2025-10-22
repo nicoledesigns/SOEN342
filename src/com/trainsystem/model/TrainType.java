@@ -1,4 +1,4 @@
-package com.railwaysearch.model;
+package com.trainsystem.model;
 //define train types
 public enum TrainType {
     RJX,

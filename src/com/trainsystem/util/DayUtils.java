@@ -1,4 +1,4 @@
-package com.railwaysearch.util;
+package com.trainsystem.util;
 
 import java.time.DayOfWeek;
 import java.util.EnumSet;

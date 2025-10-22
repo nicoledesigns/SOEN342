@@ -1,10 +1,10 @@
-package com.railwaysearch.util;
+package com.trainsystem.util;
 
 import java.time.LocalTime;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import com.railwaysearch.model.Route;
+import com.trainsystem.model.Route;
 
 public class TimeUtils {
 

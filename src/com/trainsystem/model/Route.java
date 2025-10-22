@@ -1,6 +1,6 @@
-package com.railwaysearch.model;
+package com.trainsystem.model;
 
-import com.railwaysearch.util.TimeUtils;
+import com.trainsystem.util.TimeUtils;
 
 public class Route {
     private String departureCity;

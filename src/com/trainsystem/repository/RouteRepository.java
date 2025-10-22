@@ -1,14 +1,14 @@
 //Holds all the Route objects in memory after loading from CSV, and offers simple query methods.
-package com.railwaysearch.repository;
+package com.trainsystem.repository;
 
-import com.railwaysearch.model.Route;
-import com.railwaysearch.model.TrainType;
-import com.railwaysearch.util.DayUtils;
+import com.trainsystem.model.Route;
+import com.trainsystem.model.TrainType;
+import com.trainsystem.util.DayUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.railwaysearch.util.TimeUtils;
+import com.trainsystem.util.TimeUtils;
 import java.time.DayOfWeek;
 import java.util.Set;
 
@@ -155,9 +155,14 @@ for (Route route : routes) {
         flag = false;
     }
 
-    if (!train_type.equals("")) {
-        TrainType train = TrainType.valueOf(train_type.toUpperCase());
-        if (!route.getTrainType().equals(train)) {
+    if (train_type != null && !train_type.isBlank()) {
+        try {
+            TrainType requestedType = TrainType.valueOf(train_type.trim().toUpperCase());
+            if (route.getTrainType() != requestedType) {
+                flag = false;
+            }
+        } catch (IllegalArgumentException e) {
+            // User entered an invalid train type, so skip this route
             flag = false;
         }
     }

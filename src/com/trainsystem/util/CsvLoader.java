@@ -1,9 +1,9 @@
 // this class reads the routes.csv file, converts each row into a Route, and stores it in the RouteRepository.
-package com.railwaysearch.util;
+package com.trainsystem.util;
 
-import com.railwaysearch.model.Route;
-import com.railwaysearch.model.TrainType;
-import com.railwaysearch.repository.RouteRepository;
+import com.trainsystem.model.Route;
+import com.trainsystem.model.TrainType;
+import com.trainsystem.repository.RouteRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
