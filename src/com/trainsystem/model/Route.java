@@ -59,7 +59,7 @@ public class Route {
         int minutes = durationMinutes % 60;
 
 
-        return departureCity + " -> " + arrivalCity +
+        return "\n\t\t" + departureCity + " -> " + arrivalCity +
                " | " + departureTime + "-" + arrivalTime +
                " | Duration: " + hours + "h" + String.format("%02d", minutes) + "m" +
                " | " + trainType +
