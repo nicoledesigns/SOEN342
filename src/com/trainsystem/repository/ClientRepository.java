@@ -27,4 +27,13 @@ public class ClientRepository {
             clients.add(client);
         }
     }
+
+    public Client findbyIDAndLastName(String id,String last_name) {
+        for (Client c : clients) {
+            if (c.getId().equals(id) && c.getLastName().equals(last_name))
+                return c;
+        }
+        return null;
+
+    }
 }
