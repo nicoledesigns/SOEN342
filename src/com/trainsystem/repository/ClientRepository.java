@@ -1,7 +1,6 @@
 package com.trainsystem.repository;
 
 import com.trainsystem.model.Client;
-import com.trainsystem.model.Trip;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +15,14 @@ public class ClientRepository {
     }
 
     public static ClientRepository getClientRepository() {
-        if (clientRepository==null) {
-            return new ClientRepository();
+        if (clientRepository == null) {
+            clientRepository = new ClientRepository();
         }
-        else return clientRepository;
+        return clientRepository;
+    }
+
+    public List<Client> getAllClients() {
+        return new ArrayList<>(clients);
     }
 
     public void addClient(Client client) {
@@ -28,12 +31,12 @@ public class ClientRepository {
         }
     }
 
-    public Client findbyIDAndLastName(String id,String last_name) {
+    public Client findByIdAndLastName(String id, String lastName) {
         for (Client c : clients) {
-            if (c.getId().equals(id) && c.getLastName().equals(last_name))
+            if (c.getId().equals(id) && c.getLastName().equalsIgnoreCase(lastName)) {
                 return c;
+            }
         }
         return null;
-
     }
 }

@@ -16,12 +16,12 @@ public class TicketRepository {
 
     public static TicketRepository getTicketRepository() {
         if (ticketRepository==null) {
-            return new TicketRepository();
+            ticketRepository = new TicketRepository();
         }
-        else return ticketRepository;
+        return ticketRepository;
     }
 
-    public void addTrip(Ticket ticket) {
+    public void addTicket(Ticket ticket) {
         tickets.add(ticket);
     }
 }

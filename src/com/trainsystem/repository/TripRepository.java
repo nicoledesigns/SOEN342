@@ -16,9 +16,9 @@ public class TripRepository {
 
     public static TripRepository getTripRepository() {
         if (tripRepository==null) {
-            return new TripRepository();
+            tripRepository = new TripRepository();
         }
-        else return tripRepository;
+        return tripRepository;
     }
 
     public void addTrip(Trip trip) {

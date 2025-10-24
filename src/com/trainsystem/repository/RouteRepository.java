@@ -11,7 +11,19 @@ import java.util.*;
 
 public class RouteRepository {
 
-    private final List<Route> routes = new ArrayList<>();
+    private static RouteRepository instance;
+    private final List<Route> routes;
+
+    private RouteRepository() {
+        this.routes= new ArrayList<>();
+    }
+
+    public static RouteRepository getRouteRepository() {
+        if (instance == null) {
+            instance = new RouteRepository();
+        }
+        return instance;
+    }
 
     public void addRoute(Route route) {
         routes.add(route);

@@ -1,10 +1,16 @@
 package com.trainsystem.app;
 
-import com.trainsystem.model.Connection;
-import com.trainsystem.repository.RouteRepository;
-import com.trainsystem.service.ConnectionService;
-import com.trainsystem.model.SearchCriteria;
 import com.trainsystem.dto.SearchResultDTO;
+import com.trainsystem.model.Client;
+import com.trainsystem.model.Connection;
+import com.trainsystem.model.SearchCriteria;
+import com.trainsystem.model.Ticket;
+import com.trainsystem.repository.ClientRepository;
+import com.trainsystem.service.ClientService;
+import com.trainsystem.service.ConnectionService;
+import com.trainsystem.service.TripService;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -13,13 +19,86 @@ public class TrainApp {
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
-        RouteRepository repo = new RouteRepository();
-        ConnectionService connectionService = new ConnectionService(repo);
+        ConnectionService connectionService = ConnectionService.getConnectionService();
+        ClientService clientService = ClientService.getClientService();
+        ClientRepository clientRepository = ClientRepository.getClientRepository();
+        TripService tripService = TripService.getTripService();
+
+        boolean running = true;
 
         System.out.println("\n=== Welcome to the European Train Connection System ===");
-        System.out.println("Please enter your search criteria (press Enter to skip any).");
+
+        while (running) {
+            System.out.println("\n=== Main Menu ===");
+            System.out.println("1. Register Clients");
+            System.out.println("2. Search for Connections");
+            System.out.println("3. Check My Trips");
+            System.out.println("4. Exit System");
+            System.out.print("Select an option: ");
+            String choice = scanner.nextLine().trim();
+
+            switch (choice) {
+                case "1":
+                    registerClients(scanner, clientService);
+                    break;
+
+                case "2":
+                    searchConnections(scanner, connectionService, tripService, clientRepository);
+                    break;
+
+                case "3":
+                    System.out.println("\n(View Trips feature coming in next iteration!)");
+                    break;
+
+                case "4":
+                    System.out.println("\nThank you for using the European Train Connection System!");
+                    running = false;
+                    break;
+
+                default:
+                    System.out.println("Invalid option. Please select 1–4.");
+            }
+        }
+
+        scanner.close();
+    }
+
+    private static void registerClients(Scanner scanner, ClientService clientService) {
+        boolean addingClients = true;
+
+        while (addingClients) {
+            System.out.println("\n=== Register a New Client ===");
+
+            System.out.print("First Name: ");
+            String firstName = scanner.nextLine().trim();
+
+            System.out.print("Last Name: ");
+            String lastName = scanner.nextLine().trim();
+
+            System.out.print("Age: ");
+            int age = Integer.parseInt(scanner.nextLine().trim());
+
+            var client = clientService.registerClient(firstName, lastName, age);
+
+            System.out.println("\nClient registered successfully!");
+            System.out.println(client);
+            System.out.println("Please remember your ID (" + client.getId() + ") for booking and viewing trips.");
+
+            System.out.print("\nWould you like to add another client? (y/n): ");
+            String again = scanner.nextLine().trim().toLowerCase();
+            if (!again.equals("y")) {
+                addingClients = false;
+                System.out.println("Returning to main menu...");
+            }
+        }
+    }
+
+    private static void searchConnections(Scanner scanner, ConnectionService connectionService, TripService tripService, ClientRepository clientRepository) {
+        System.out.println("\n=== Search for Train Connections ===");
+        System.out.println("(Press Enter to skip any criteria)");
 
         SearchCriteria criteria = new SearchCriteria();
+
         System.out.print("1. Departure City: ");
         criteria.setDepartureCity(scanner.nextLine().trim());
         System.out.print("2. Arrival City: ");
@@ -32,13 +111,16 @@ public class TrainApp {
         criteria.setTrainType(scanner.nextLine().trim());
         System.out.print("6. Days of Operation: ");
         criteria.setDaysOfOperation(scanner.nextLine().trim());
-        System.out.print("7. First class max price (€): ");
+
+        System.out.print("7. Max First Class Price (€): ");
         String first = scanner.nextLine().trim();
         criteria.setFirstClassPrice(first.isEmpty() ? 0 : Double.parseDouble(first));
-        System.out.print("8. Second class max price (€): ");
+
+        System.out.print("8. Max Second Class Price (€): ");
         String second = scanner.nextLine().trim();
         criteria.setSecondClassPrice(second.isEmpty() ? 0 : Double.parseDouble(second));
-        System.out.println("\nSort options:");
+
+        System.out.println("\nSort Options:");
         System.out.println("A. None");
         System.out.println("B. Duration (shortest first)");
         System.out.println("C. First class (low → high)");
@@ -61,7 +143,7 @@ public class TrainApp {
                 System.out.println((i + 1) + ". " + connections.get(i));
             }
 
-            System.out.print("\nSelect a connection to book (number) or press Enter to exit: ");
+            System.out.print("\nSelect a connection to book (number) or press Enter to return: ");
             String selection = scanner.nextLine().trim();
             if (!selection.isEmpty()) {
                 try {
@@ -70,7 +152,43 @@ public class TrainApp {
                         Connection chosen = connections.get(index);
                         System.out.println("\nYou selected:");
                         System.out.println(chosen);
-                        System.out.println("\n(Booking logic will be handled by TripService later.)");
+
+                        List<Client> bookingClients = new ArrayList<>();
+                        boolean addingClients = true;
+
+                        while (addingClients) {
+                            System.out.print("\nEnter client last name: ");
+                            String lastName = scanner.nextLine().trim();
+                            System.out.print("Enter client ID: ");
+                            String id = scanner.nextLine().trim();
+
+                            Client client = clientRepository.findByIdAndLastName(id, lastName);
+
+                            if (client != null) {
+                                bookingClients.add(client);
+                                System.out.println("Added " + client.getFirstName() + " " + client.getLastName() + " to booking.");
+                            } else {
+                                System.out.println("No client found with that ID and last name.");
+                            }
+
+                            System.out.print("Add another client? (y/n): ");
+                            String again = scanner.nextLine().trim().toLowerCase();
+                            if (!again.equals("y")) {
+                                addingClients = false;
+                            }
+                        }
+
+                        if (tripService.validateBooking(chosen, bookingClients)) {
+                            List<Ticket> tickets = tripService.generateTrip(chosen, bookingClients);
+                            System.out.println("\nBooking confirmed!");
+                            System.out.println("Tickets generated:");
+                            for (Ticket t : tickets) {
+                                System.out.println("\n" + t.toString());
+                            }
+                        } else {
+                            System.out.println("\nBooking could not be validated.");
+                        }
+
                     } else {
                         System.out.println("Invalid selection.");
                     }
@@ -79,8 +197,5 @@ public class TrainApp {
                 }
             }
         }
-
-        System.out.println("\nThank you for using the European Train Connection System!");
-        scanner.close();
     }
 }

@@ -1,9 +1,12 @@
 package com.trainsystem.service;
 
+import com.trainsystem.repository.ClientRepository;
 import com.trainsystem.repository.RouteRepository;
 import com.trainsystem.model.Route;
 import com.trainsystem.model.Connection;
 import com.trainsystem.model.SearchCriteria;
+import com.trainsystem.repository.TicketRepository;
+import com.trainsystem.repository.TripRepository;
 import com.trainsystem.util.CsvLoader;
 import com.trainsystem.dto.SearchResultDTO;
 
@@ -12,12 +15,20 @@ import java.util.stream.Collectors;
 
 public class ConnectionService {
 
+    private static ConnectionService instance;
     private final RouteRepository routeRepository;
     private final Map<String, List<Connection>> searchCache = new HashMap<>();
 
-    public ConnectionService(RouteRepository routeRepository) {
+    private ConnectionService(RouteRepository routeRepository) {
         this.routeRepository = routeRepository;
         CsvLoader.load("routes.csv", routeRepository); // load on startup
+    }
+
+    public static ConnectionService getConnectionService() {
+        if (instance == null) {
+            instance = new ConnectionService(RouteRepository.getRouteRepository());
+        }
+        return instance;
     }
 
     public SearchResultDTO searchConnections(SearchCriteria criteria) {
