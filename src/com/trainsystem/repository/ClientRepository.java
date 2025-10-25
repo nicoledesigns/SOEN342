@@ -31,6 +31,17 @@ public class ClientRepository {
         }
     }
 
+    //find client by id only
+    public Client findById(String id) {
+        for (Client c : clients) {
+            if (c.getId().equals(id)) {
+            return c;
+        }
+    }
+        return null;
+    }
+    
+    //find client by id and name
     public Client findByIdAndLastName(String id, String lastName) {
         for (Client c : clients) {
             if (c.getId().equals(id) && c.getLastName().equalsIgnoreCase(lastName)) {
