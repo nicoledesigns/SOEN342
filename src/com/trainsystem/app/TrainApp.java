@@ -34,6 +34,7 @@ public class TrainApp {
             System.out.println("2. Search for Connections");
             System.out.println("3. Check My Trips");
             System.out.println("4. Exit System");
+            System.out.println("5. View All Clients");  // ← add this line
             System.out.print("Select an option: ");
             String choice = scanner.nextLine().trim();
 
@@ -47,23 +48,24 @@ public class TrainApp {
                     break;
 
                 case "3":
-                    System.out.println("\n(View Trips feature coming in next iteration!)");
+                    displayCurrentAndPastTrips(scanner, tripService);
                     break;
 
                 case "4":
                     System.out.println("\nThank you for using the European Train Connection System!");
                     running = false;
                     break;
-
+                case "5":
+                    clientService.listAllClients();  // ← add this line
+                    break;
                 default:
-                    System.out.println("Invalid option. Please select 1–4.");
+                    System.out.println("Invalid option. Please select 1–5.");
             }
         }
 
         scanner.close();
     }
-
-    private static void registerClients(Scanner scanner, ClientService clientService) {
+   /*  private static void registerClients(Scanner scanner, ClientService clientService) {
         boolean addingClients = true;
 
         while (addingClients) {
@@ -79,11 +81,9 @@ public class TrainApp {
             int age = Integer.parseInt(scanner.nextLine().trim());
 
             var client = clientService.registerClient(firstName, lastName, age);
-
             System.out.println("\nClient registered successfully!");
             System.out.println(client);
             System.out.println("Please remember your ID (" + client.getId() + ") for booking and viewing trips.");
-
             System.out.print("\nWould you like to add another client? (y/n): ");
             String again = scanner.nextLine().trim().toLowerCase();
             if (!again.equals("y")) {
@@ -92,6 +92,56 @@ public class TrainApp {
             }
         }
     }
+*/ 
+private static void registerClients(Scanner scanner, ClientService clientService) {
+    boolean addingClients = true;
+
+    while (addingClients) {
+        System.out.println("\n=== Register a New Client ===");
+
+        System.out.print("Enter your unique ID (e.g., passport or license number): ");
+        String id = scanner.nextLine().trim();
+
+        System.out.print("First Name: ");
+        String firstName = scanner.nextLine().trim();
+
+        System.out.print("Last Name: ");
+        String lastName = scanner.nextLine().trim();
+
+        System.out.print("Age: ");
+        int age = Integer.parseInt(scanner.nextLine().trim());
+
+        // Attempt to register the client
+        var client = clientService.registerClient(id, firstName, lastName, age);
+
+        if (client != null) {
+            System.out.println("\nClient registered successfully!");
+            System.out.println(client);
+            System.out.println("Your ID (" + client.getId() + ") will be used for booking and viewing trips.");
+        } else {
+            System.out.println("\n⚠️ Registration failed: A client with this ID already exists. Please try again with a different ID.");
+        }
+
+        System.out.print("\nWould you like to add another client? (y/n): ");
+        String again = scanner.nextLine().trim().toLowerCase();
+        if (!again.equals("y")) {
+            addingClients = false;
+            System.out.println("Returning to main menu...");
+        }
+    }
+}
+    private static void displayCurrentAndPastTrips(Scanner scanner, TripService tripService) {
+        System.out.println("\n=== View My Trips ===");
+
+        System.out.print("Enter your Client ID: ");
+        String clientId = scanner.nextLine().trim();
+
+        System.out.print("Enter your Last Name: ");
+        String lastName = scanner.nextLine().trim();
+
+        // Call the service method to show trips
+        tripService.viewTrips(clientId, lastName);
+}
 
     private static void searchConnections(Scanner scanner, ConnectionService connectionService, TripService tripService, ClientRepository clientRepository) {
         System.out.println("\n=== Search for Train Connections ===");
