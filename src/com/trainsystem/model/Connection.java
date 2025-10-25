@@ -3,13 +3,19 @@ package com.trainsystem.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.time.LocalDate;  
+
 
 public class Connection {
 
     private final List<Route> routes;
+    private LocalDate travelDate; // new field for data of trip (current/past)
 
-    public Connection(List<Route> routes) {
+
+    public Connection(List<Route> routes, LocalDate travelDate) {
         this.routes = new ArrayList<>(routes); // defensive copy
+        this.travelDate = travelDate;
+
     }
 
     public List<Route> getRoutes() {
@@ -42,6 +48,14 @@ public class Connection {
 
     public int getNumberOfStops() {
         return routes.size() - 1;
+    }
+    
+    public void setTravelDate(LocalDate date) {
+        this.travelDate = date;
+    }
+
+    public LocalDate getTravelDate() {
+        return travelDate;
     }
 
     @Override

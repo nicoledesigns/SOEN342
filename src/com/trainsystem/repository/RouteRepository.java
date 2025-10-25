@@ -8,6 +8,8 @@ import com.trainsystem.util.TimeUtils;
 
 import java.time.DayOfWeek;
 import java.util.*;
+import java.time.LocalDate; 
+
 
 public class RouteRepository {
 
@@ -39,7 +41,7 @@ public class RouteRepository {
         for (Route route : routes) {
             if (route.getDepartureCity().equalsIgnoreCase(departureCity)
                     && route.getArrivalCity().equalsIgnoreCase(arrivalCity)) {
-                results.add(new Connection(List.of(route)));
+        results.add(new Connection(List.of(route), LocalDate.now())); // added travel date
             }
         }
 
@@ -57,7 +59,7 @@ public class RouteRepository {
 
                         long wait = TimeUtils.getDurationMinutes(firstLeg.getArrivalTime(), secondLeg.getDepartureTime());
                         if (wait >= 0) {
-                            results.add(new Connection(List.of(firstLeg, secondLeg)));
+                        results.add(new Connection(List.of(firstLeg, secondLeg), LocalDate.now()));//added local date
                         }
                     }
                 }
@@ -84,7 +86,7 @@ public class RouteRepository {
                                 long wait2 = TimeUtils.getDurationMinutes(secondLeg.getArrivalTime(), thirdLeg.getDepartureTime());
 
                                 if (wait1 >= 0 && wait2 >= 0) {
-                                    results.add(new Connection(List.of(firstLeg, secondLeg, thirdLeg)));
+                                results.add(new Connection(List.of(firstLeg, secondLeg, thirdLeg), LocalDate.now()));//added local date
                                 }
                             }
                         }

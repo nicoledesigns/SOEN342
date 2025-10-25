@@ -13,6 +13,10 @@ public class TicketRepository {
     private TicketRepository() {
         tickets = new ArrayList<>();
     }
+    public List<Ticket> getAllTickets() {
+    return new ArrayList<>(tickets); // return a copy to avoid external modification
+}
+
 
     public static TicketRepository getTicketRepository() {
         if (ticketRepository==null) {

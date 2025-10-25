@@ -11,7 +11,7 @@ public class Client {
     private String lastName;
     private int age;
     private List<Ticket> tickets;
-
+/**  constructor with no id
     public Client(String firstName, String lastName, int age) {
         this.id = "C" + (++clientCount);
         this.firstName = firstName;
@@ -19,6 +19,15 @@ public class Client {
         this.age = age;
         this.tickets = new ArrayList<>();
     }
+*/
+//new constructor with id
+public Client(String id, String firstName, String lastName, int age) {
+    this.id = id;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.age = age;
+    this.tickets = new ArrayList<>();
+}
 
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
