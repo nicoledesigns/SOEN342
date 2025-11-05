@@ -68,7 +68,6 @@ clientRepository = ClientRepository.getClientRepository();
 tripService = TripService.getTripService();
 System.out.println("Services initialized.");
 
-
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
 

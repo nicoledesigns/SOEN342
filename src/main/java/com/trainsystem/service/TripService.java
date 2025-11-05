@@ -35,6 +35,13 @@ public class TripService {
         return instance;
     }
 
+    public void printTrips(){
+        List<Trip> trips =tripRepository.getTrips();
+        for (Trip trip: trips){
+            System.out.println(trip);
+        }
+    }
+
     public void logTrip(Trip trip) {
         tripRepository.addTrip(trip);
     }

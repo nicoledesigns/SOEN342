@@ -31,6 +31,10 @@ public class TripRepository {
         return tripRepository;
     }
 
+    public List<Trip> getTrips() {
+        return trips;
+    }
+
     public void addTrip(Trip trip) {
         if (!trips.contains(trip)) {
             trips.add(trip);
@@ -43,20 +47,37 @@ public class TripRepository {
         return trips;
     }
 
-public List<Trip> getTripsByClient(String id) {
-    return trips.stream()
-            .filter(t -> t.getTickets().stream()
-                          .anyMatch(ticket -> ticket.getClient().getId().equalsIgnoreCase(id)))
-            .collect(Collectors.toList());
-}
+    public List<Trip> getTripsByClient(String clientId) {
+        if (clientId == null) return List.of();
+        String needle = clientId.trim();
+        return trips.stream()
+                .filter(t -> {
+                    var tickets = t.getTickets();
+                    if (tickets == null || tickets.isEmpty()) return false;
+                    return tickets.stream().anyMatch(ticket -> {
+                        var c = ticket.getClient();
+                        var id = (c == null ? null : c.getId());
+                        return id != null && id.equals(needle);
+                    });
+                })
+                .toList();
+    }
 
-public List<Trip> getHistoryTripsByClient(String id) {
-    return historyTrips.stream()
-            .filter(t -> t.getTickets().stream()
-                          .anyMatch(ticket -> ticket.getClient().getId().equalsIgnoreCase(id)))
-            .collect(Collectors.toList());
-}
-
+    public List<Trip> getHistoryTripsByClient(String clientId) {
+        if (clientId == null) return List.of();
+        String needle = clientId.trim();
+        return historyTrips.stream()
+                .filter(t -> {
+                    var tickets = t.getTickets();
+                    if (tickets == null || tickets.isEmpty()) return false;
+                    return tickets.stream().anyMatch(ticket -> {
+                        var c = ticket.getClient();
+                        var id = (c == null ? null : c.getId());
+                        return id != null && id.equals(needle);
+                    });
+                })
+                .toList();
+    }
 
     // Automatically moves past trips to history
     public void updateTripHistory() {
