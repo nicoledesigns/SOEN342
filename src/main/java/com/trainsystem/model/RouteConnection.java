@@ -6,13 +6,13 @@ import java.util.List;
 import java.time.LocalDate;  
 
 
-public class Connection {
+public class RouteConnection {
 
     private final List<Route> routes;
     private LocalDate travelDate; // new field for data of trip (current/past)
 
 
-    public Connection(List<Route> routes, LocalDate travelDate) {
+    public RouteConnection(List<Route> routes, LocalDate travelDate) {
         this.routes = new ArrayList<>(routes); // defensive copy
         this.travelDate = travelDate;
 

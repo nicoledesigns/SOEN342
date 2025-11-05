@@ -1,6 +1,8 @@
 package com.trainsystem.model;
 
 import com.trainsystem.util.TimeUtils;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class Route {
     private String departureCity;
@@ -11,11 +13,16 @@ public class Route {
     private String daysOfOperation;
     private double firstClassPrice;
     private double secondClassPrice;
+    private String routeId;  // new field for routeID
+    private static final AtomicInteger routeCounter = new AtomicInteger(0); // auto-increment counter
+
+
 
    
-    // Constructor
+    // Constructor auto-generates routeId
     public Route(String departureCity, String arrivalCity, String departureTime, String arrivalTime,
                  TrainType trainType, String daysOfOperation, double firstClassPrice, double secondClassPrice) {
+        this.routeId = "R" + String.format("%04d", routeCounter.incrementAndGet());
         this.departureCity = departureCity;
         this.arrivalCity = arrivalCity;
         this.departureTime = departureTime;
@@ -26,7 +33,21 @@ public class Route {
         this.secondClassPrice = secondClassPrice;
     }
 
+  // Constructor for DB-loaded route (routeId provided)
+    public Route(String routeId, String departureCity, String arrivalCity, String departureTime, String arrivalTime,
+                 TrainType trainType, String daysOfOperation, double firstClassPrice, double secondClassPrice) {
+        this.routeId = routeId;
+        this.departureCity = departureCity;
+        this.arrivalCity = arrivalCity;
+        this.departureTime = departureTime;
+        this.arrivalTime = arrivalTime;
+        this.trainType = trainType;
+        this.daysOfOperation = daysOfOperation;
+        this.firstClassPrice = firstClassPrice;
+        this.secondClassPrice = secondClassPrice;
+    }
     // ---------- Getters ----------
+    public String getRouteId() {return routeId;} //added routeId
     public String getDepartureCity() { return departureCity; }
     public String getArrivalCity() { return arrivalCity; }
     public String getDepartureTime() { return departureTime; }
@@ -37,6 +58,7 @@ public class Route {
     public double getSecondClassPrice() { return secondClassPrice; }
 
     // ---------- Setters ----------
+    public void setRouteId(String routeId) {this.routeId = routeId;}
     public void setDepartureCity(String departureCity) { this.departureCity = departureCity; }
     public void setArrivalCity(String arrivalCity) { this.arrivalCity = arrivalCity; }
     public void setDepartureTime(String departureTime) { this.departureTime = departureTime; }
@@ -65,6 +87,7 @@ public class Route {
                " | " + trainType +
                " | Days: " + daysOfOperation +
                " | 1st: €" + firstClassPrice +
-               " | 2nd: €" + secondClassPrice;
+               " | 2nd: €" + secondClassPrice +
+               " | RouteID: " + routeId;
     }
 }

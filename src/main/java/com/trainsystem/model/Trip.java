@@ -23,6 +23,8 @@ public class Trip {
     public Trip(List<Ticket> tickets) {
         this.id = "TR" + (++tripCount);
         this.tickets = tickets;
+        this.date = LocalDate.now(); //added this
+
     }
 
     public String getId() {

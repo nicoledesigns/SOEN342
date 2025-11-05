@@ -2,31 +2,78 @@ package com.trainsystem.app;
 
 import com.trainsystem.dto.SearchResultDTO;
 import com.trainsystem.model.Client;
-import com.trainsystem.model.Connection;
+import com.trainsystem.model.RouteConnection;
 import com.trainsystem.model.SearchCriteria;
 import com.trainsystem.model.Ticket;
 import com.trainsystem.repository.ClientRepository;
 import com.trainsystem.service.ClientService;
 import com.trainsystem.service.ConnectionService;
 import com.trainsystem.service.TripService;
+import com.trainsystem.db.DbInitializer;
+
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+
 public class TrainApp {
+    private static ConnectionService connectionService;
+    private static ClientService clientService;
+    private static ClientRepository clientRepository;
+    private static TripService tripService;
+
+    private static final String DB_PATH = System.getProperty("user.dir") + "/railway.db";
+
+
+  public static Connection getDatabaseConnection() {
+        try {
+            // Load SQLite driver
+            Class.forName("org.sqlite.JDBC");
+
+            // Connect directly to the persistent DB
+            String jdbcUrl = "jdbc:sqlite:" + DB_PATH;
+            return DriverManager.getConnection(jdbcUrl);
+
+        } catch (SQLException | ClassNotFoundException e) {
+            System.err.println("Error connecting to DB: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+
+
+
 
     public static void main(String[] args) {
 
-        Scanner scanner = new Scanner(System.in);
-        ConnectionService connectionService = ConnectionService.getConnectionService();
-        ClientService clientService = ClientService.getClientService();
-        ClientRepository clientRepository = ClientRepository.getClientRepository();
-        TripService tripService = TripService.getTripService();
+            DbInitializer.initializeDatabase();
 
+          Connection conn = getDatabaseConnection();
+        if (conn != null) {
+            System.out.println("Connected to SQLite successfully: " + conn);
+        }
+System.out.println("Initializing services...");
+connectionService = ConnectionService.getConnectionService();
+clientService = ClientService.getClientService();
+clientRepository = ClientRepository.getClientRepository();
+tripService = TripService.getTripService();
+System.out.println("Services initialized.");
+
+
+        Scanner scanner = new Scanner(System.in);
         boolean running = true;
 
         System.out.println("\n=== Welcome to the European Train Connection System ===");
+System.out.flush();
 
         while (running) {
             System.out.println("\n=== Main Menu ===");
@@ -182,7 +229,7 @@ private static void registerClients(Scanner scanner, ClientService clientService
 
         System.out.println("\nSearching for connections...");
         SearchResultDTO result = connectionService.searchConnections(criteria);
-        List<Connection> connections = result.getResults();
+        List<RouteConnection> connections = result.getResults();
 
         System.out.println("\n=== Search ID: " + result.getSearchId() + " ===");
         if (connections.isEmpty()) {
@@ -199,7 +246,7 @@ private static void registerClients(Scanner scanner, ClientService clientService
                 try {
                     int index = Integer.parseInt(selection) - 1;
                     if (index >= 0 && index < connections.size()) {
-                        Connection chosen = connections.get(index);
+                        RouteConnection chosen = connections.get(index);
                         System.out.println("\nYou selected:");
                         System.out.println(chosen);
 

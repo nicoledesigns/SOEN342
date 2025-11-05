@@ -1,13 +1,13 @@
 package com.trainsystem.dto;
 
-import com.trainsystem.model.Connection;
+import com.trainsystem.model.RouteConnection;
 import java.util.List;
 
 public class SearchResultDTO {
     private String searchId;
-    private List<Connection> results;
+    private List<RouteConnection> results;
 
-    public SearchResultDTO(String searchId, List<Connection> results) {
+    public SearchResultDTO(String searchId, List<RouteConnection> results) {
         this.searchId = searchId;
         this.results = results;
     }
@@ -16,7 +16,7 @@ public class SearchResultDTO {
         return searchId;
     }
 
-    public List<Connection> getResults() {
+    public List<RouteConnection> getResults() {
         return results;
     }
 }

@@ -3,7 +3,7 @@ package com.trainsystem.service;
 import com.trainsystem.repository.ClientRepository;
 import com.trainsystem.repository.RouteRepository;
 import com.trainsystem.model.Route;
-import com.trainsystem.model.Connection;
+import com.trainsystem.model.RouteConnection;
 import com.trainsystem.model.SearchCriteria;
 import com.trainsystem.repository.TicketRepository;
 import com.trainsystem.repository.TripRepository;
@@ -12,16 +12,28 @@ import com.trainsystem.dto.SearchResultDTO;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.io.InputStream;
+
 
 public class ConnectionService {
 
     private static ConnectionService instance;
     private final RouteRepository routeRepository;
-    private final Map<String, List<Connection>> searchCache = new HashMap<>();
+    private final Map<String, List<RouteConnection>> searchCache = new HashMap<>();
 
     private ConnectionService(RouteRepository routeRepository) {
         this.routeRepository = routeRepository;
-        CsvLoader.load("routes.csv", routeRepository); // load on startup
+           // Load CSV from resources
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("routes.csv")) {
+            if (is == null) {
+                System.err.println("routes.csv not found in resources!");
+            } else {
+                CsvLoader.load(is, routeRepository);
+                System.out.println("Routes loaded: " + routeRepository.size());
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading routes.csv: " + e.getMessage());
+        }
     }
 
     public static ConnectionService getConnectionService() {
@@ -32,13 +44,11 @@ public class ConnectionService {
     }
 
     public SearchResultDTO searchConnections(SearchCriteria criteria) {
-        // Start by trying direct connections
-        List<Connection> connections = new ArrayList<>(routeRepository.findDirectConnections(
+        List<RouteConnection> connections = new ArrayList<>(routeRepository.findDirectConnections(
                 criteria.getDepartureCity(),
                 criteria.getArrivalCity()
         ));
 
-        // If none, include 1-stop and 2-stop connections
         if (connections.isEmpty()) {
             connections.addAll(routeRepository.find1StopConnections(criteria.getDepartureCity(), criteria.getArrivalCity()));
             connections.addAll(routeRepository.find2StopConnections(criteria.getDepartureCity(), criteria.getArrivalCity()));
@@ -52,17 +62,15 @@ public class ConnectionService {
         return new SearchResultDTO(searchId, connections);
     }
 
-    private List<Connection> filterConnections(List<Connection> connections, SearchCriteria criteria) {
+    private List<RouteConnection> filterConnections(List<RouteConnection> connections, SearchCriteria criteria) {
         return connections.stream()
                 .filter(conn -> {
-                    // Filter by train type
                     if (criteria.getTrainType() != null && !criteria.getTrainType().isBlank()) {
                         boolean anyMatch = conn.getRoutes().stream()
                                 .anyMatch(route -> route.getTrainType().name().equalsIgnoreCase(criteria.getTrainType()));
                         if (!anyMatch) return false;
                     }
 
-                    // Filter by price range (both classes)
                     if (criteria.getFirstClassPrice() > 0) {
                         boolean allUnder = conn.getRoutes().stream()
                                 .allMatch(r -> r.getFirstClassPrice() <= criteria.getFirstClassPrice());
@@ -80,32 +88,30 @@ public class ConnectionService {
                 .collect(Collectors.toList());
     }
 
-    private List<Connection> sortConnections(List<Connection> connections, String sortOption) {
+    private List<RouteConnection> sortConnections(List<RouteConnection> connections, String sortOption) {
         if (sortOption == null || connections.isEmpty()) return connections;
 
         switch (sortOption.toUpperCase()) {
-            case "B": // Trip duration (low → high)
+            case "B":
                 connections.sort(Comparator.comparingInt(this::getTotalDuration));
                 break;
-            case "C": // First class (low → high)
+            case "C":
                 connections.sort(Comparator.comparingDouble(this::getTotalFirstClassPrice));
                 break;
-            case "D": // First class (high → low)
+            case "D":
                 connections.sort(Comparator.comparingDouble(this::getTotalFirstClassPrice).reversed());
                 break;
-            case "E": // Second class (low → high)
+            case "E":
                 connections.sort(Comparator.comparingDouble(this::getTotalSecondClassPrice));
                 break;
-            case "F": // Second class (high → low)
+            case "F":
                 connections.sort(Comparator.comparingDouble(this::getTotalSecondClassPrice).reversed());
                 break;
         }
-
         return connections;
     }
 
-    private int getTotalDuration(Connection connection) {
-        // total = travel durations + layovers
+    private int getTotalDuration(RouteConnection connection) {
         List<Route> routes = connection.getRoutes();
         int total = 0;
         for (int i = 0; i < routes.size(); i++) {
@@ -119,19 +125,15 @@ public class ConnectionService {
         return total;
     }
 
-    private double getTotalFirstClassPrice(Connection connection) {
-        return connection.getRoutes().stream()
-                .mapToDouble(Route::getFirstClassPrice)
-                .sum();
+    private double getTotalFirstClassPrice(RouteConnection connection) {
+        return connection.getRoutes().stream().mapToDouble(Route::getFirstClassPrice).sum();
     }
 
-    private double getTotalSecondClassPrice(Connection connection) {
-        return connection.getRoutes().stream()
-                .mapToDouble(Route::getSecondClassPrice)
-                .sum();
+    private double getTotalSecondClassPrice(RouteConnection connection) {
+        return connection.getRoutes().stream().mapToDouble(Route::getSecondClassPrice).sum();
     }
 
-    public List<Connection> getSearchResults(String searchId) {
+    public List<RouteConnection> getSearchResults(String searchId) {
         return searchCache.getOrDefault(searchId, List.of());
     }
 }

@@ -3,6 +3,9 @@ package com.trainsystem.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.sql.ResultSet; //for database
+import java.sql.SQLException; //for database
+
 public class Client {
 
     private static int clientCount = 0;
@@ -11,6 +14,20 @@ public class Client {
     private String lastName;
     private int age;
     private List<Ticket> tickets;
+
+
+//for new database
+public Client(ResultSet rs) throws SQLException {
+    this.id = rs.getString("id");
+    this.firstName = rs.getString("first_name");
+    this.lastName = rs.getString("last_name");
+    this.age = rs.getInt("age");
+    this.tickets = new ArrayList<>(); // will be populated later if needed
+}
+
+
+
+
 /**  constructor with no id
     public Client(String firstName, String lastName, int age) {
         this.id = "C" + (++clientCount);
