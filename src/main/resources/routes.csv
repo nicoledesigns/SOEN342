@@ -1,6 +1,6 @@
 Route ID,Departure City,Arrival City,Departure Time,Arrival Time,Train Type,Days of Operation,First Class ticket rate (in euro),Second Class ticket rate (in euro)
 R00003,A Coruña,Santander,12:05,14:17,RJX,Fri-Sun,115,70
-R00004,A Coruña,Santander,12:50,15:54,ICE,Daily,97,69
+R00004,A Coruña,Santander,1250,15:54,ICE,Daily,97,69
 R00007,A Coruña,Santiago de Compostela,16:50,20:08,InterCity,"Mon,Wed,Fri",95,60
 R00008,A Coruña,Vigo,13:35,17:10,Frecciarossa,"Tue,Thu",141,97
 R00009,A Coruña,Vigo,09:45,11:49,RJX,"Tue,Thu",118,72

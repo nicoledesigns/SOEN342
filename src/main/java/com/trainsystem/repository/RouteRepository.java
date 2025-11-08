@@ -105,7 +105,7 @@ public class RouteRepository {
         }
         return results;
        }
-
+/**  
     public List<RouteConnection> find1StopConnections(String departureCity, String arrivalCity) {
         List<RouteConnection> results = new ArrayList<>();
         for (Route firstLeg : routes) {
@@ -122,6 +122,7 @@ public class RouteRepository {
         }
         return results;
     }
+
 
     public List<RouteConnection> find2StopConnections(String departureCity, String arrivalCity) {
         List<RouteConnection> results = new ArrayList<>();
@@ -145,6 +146,92 @@ public class RouteRepository {
         }
         return results;
     }
+*/
+public List<RouteConnection> find1StopConnections(String departureCity, String arrivalCity) {
+    List<RouteConnection> results = new ArrayList<>();
+    for (Route firstLeg : routes) {
+        if (firstLeg.getDepartureCity().equalsIgnoreCase(departureCity)) {
+            for (Route secondLeg : routes) {
+                if (secondLeg.getDepartureCity().equalsIgnoreCase(firstLeg.getArrivalCity())
+                        && secondLeg.getArrivalCity().equalsIgnoreCase(arrivalCity)) {
+
+                    long wait = TimeUtils.getDurationMinutes(firstLeg.getArrivalTime(), secondLeg.getDepartureTime());
+                    System.out.println("DEBUG 1-STOP: " + firstLeg.getRouteId() + " -> " + secondLeg.getRouteId() +
+                            ", Arrival=" + firstLeg.getArrivalTime() +
+                            ", Departure=" + secondLeg.getDepartureTime() +
+                            ", Wait=" + wait + " mins");
+
+                    if (wait >= 0) {
+                        // --- LAYOVER POLICY ---
+                        java.time.LocalTime arrivalTime = java.time.LocalTime.parse(firstLeg.getArrivalTime());
+                        boolean afterHours = arrivalTime.isBefore(java.time.LocalTime.of(8, 0))
+                                || arrivalTime.isAfter(java.time.LocalTime.of(17, 0));
+                        boolean layoverAllowed = afterHours ? (wait <= 30) : (wait <= 120);
+
+                        System.out.println("DEBUG 1-STOP: afterHours=" + afterHours + ", layoverAllowed=" + layoverAllowed);
+
+                        if (layoverAllowed) {
+                            results.add(new RouteConnection(List.of(firstLeg, secondLeg), java.time.LocalDate.now()));
+                            System.out.println("DEBUG 1-STOP: Added connection " + firstLeg.getRouteId() + " -> " + secondLeg.getRouteId());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return results;
+}
+
+public List<RouteConnection> find2StopConnections(String departureCity, String arrivalCity) {
+    List<RouteConnection> results = new ArrayList<>();
+    for (Route firstLeg : routes) {
+        if (firstLeg.getDepartureCity().equalsIgnoreCase(departureCity)) {
+            for (Route secondLeg : routes) {
+                if (secondLeg.getDepartureCity().equalsIgnoreCase(firstLeg.getArrivalCity())) {
+                    for (Route thirdLeg : routes) {
+                        if (thirdLeg.getDepartureCity().equalsIgnoreCase(secondLeg.getArrivalCity())
+                                && thirdLeg.getArrivalCity().equalsIgnoreCase(arrivalCity)) {
+
+                            long wait1 = TimeUtils.getDurationMinutes(firstLeg.getArrivalTime(), secondLeg.getDepartureTime());
+                            long wait2 = TimeUtils.getDurationMinutes(secondLeg.getArrivalTime(), thirdLeg.getDepartureTime());
+
+                            System.out.println("DEBUG 2-STOP: " + firstLeg.getRouteId() + " -> " + secondLeg.getRouteId() +
+                                    " -> " + thirdLeg.getRouteId() +
+                                    ", Wait1=" + wait1 + " mins, Wait2=" + wait2 + " mins");
+
+                            if (wait1 >= 0 && wait2 >= 0) {
+                                // --- LAYOVER POLICY #1 ---
+                                java.time.LocalTime arr1 = java.time.LocalTime.parse(firstLeg.getArrivalTime());
+                                boolean afterHours1 = arr1.isBefore(java.time.LocalTime.of(8, 0))
+                                        || arr1.isAfter(java.time.LocalTime.of(17, 0));
+                                boolean layover1 = afterHours1 ? (wait1 <= 30) : (wait1 <= 120);
+
+                                // --- LAYOVER POLICY #2 ---
+                                java.time.LocalTime arr2 = java.time.LocalTime.parse(secondLeg.getArrivalTime());
+                                boolean afterHours2 = arr2.isBefore(java.time.LocalTime.of(8, 0))
+                                        || arr2.isAfter(java.time.LocalTime.of(17, 0));
+                                boolean layover2 = afterHours2 ? (wait2 <= 30) : (wait2 <= 120);
+
+                                System.out.println("DEBUG 2-STOP: Layover1 allowed=" + layover1 + ", afterHours1=" + afterHours1 +
+                                        "; Layover2 allowed=" + layover2 + ", afterHours2=" + afterHours2);
+
+                                if (layover1 && layover2) {
+                                    results.add(new RouteConnection(
+                                            List.of(firstLeg, secondLeg, thirdLeg),
+                                            java.time.LocalDate.now()));
+                                    System.out.println("DEBUG 2-STOP: Added connection " +
+                                            firstLeg.getRouteId() + " -> " + secondLeg.getRouteId() + " -> " + thirdLeg.getRouteId());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return results;
+}
+
 
     public List<RouteConnection> findAllConnections(String departureCity, String arrivalCity) {
         List<RouteConnection> all = new ArrayList<>();

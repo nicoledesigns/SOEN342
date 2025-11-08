@@ -91,4 +91,12 @@ public static void printConnection(List<Route> connection) {
     int totalMinutes = getTripDuration(connection); System.out.printf(">>> Total Journey Duration: %dh %02dm%n%n", totalMinutes / 60, totalMinutes % 60);
 }
 
+// Checks if a time is within a given range (inclusive)
+public static boolean isWithin(String time, String start, String end) {
+    LocalTime t = parse(time);
+    LocalTime s = parse(start);
+    LocalTime e = parse(end);
+    return !t.isBefore(s) && !t.isAfter(e);
+}
+
 }

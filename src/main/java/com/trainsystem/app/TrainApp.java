@@ -10,6 +10,8 @@ import com.trainsystem.service.ClientService;
 import com.trainsystem.service.ConnectionService;
 import com.trainsystem.service.TripService;
 import com.trainsystem.db.DbInitializer;
+import com.trainsystem.model.Route;
+import com.trainsystem.util.TimeUtils;
 
 
 import java.util.ArrayList;
@@ -67,6 +69,23 @@ clientService = ClientService.getClientService();
 clientRepository = ClientRepository.getClientRepository();
 tripService = TripService.getTripService();
 System.out.println("Services initialized.");
+ // ======== TEST LAYOUTS FOR TIMEUTILS & LAYOVER POLICY ========
+    System.out.println("\n=== TEST: Layover & Duration ===");
+    List<Route> testConnection = new ArrayList<>();
+    testConnection.add(new Route("R00007", "A Coruña", "Santiago de Compostela", "16:50", "20:08", null, "", 0, 0));
+    testConnection.add(new Route("R00008", "Santiago de Compostela", "Vigo", "21:00", "23:00", null, "", 0, 0));
+
+    TimeUtils.printConnection(testConnection);
+
+    int totalDuration = TimeUtils.getTripDuration(testConnection);
+    System.out.println("Total duration in minutes: " + totalDuration);
+
+    int layover = TimeUtils.getLayoverMinutes(
+            testConnection.get(0).getArrivalTime(),
+            testConnection.get(1).getDepartureTime()
+    );
+    System.out.println("Layover in minutes: " + layover);
+
 
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
@@ -192,6 +211,10 @@ private static void registerClients(Scanner scanner, ClientService clientService
     private static void searchConnections(Scanner scanner, ConnectionService connectionService, TripService tripService, ClientRepository clientRepository) {
         System.out.println("\n=== Search for Train Connections ===");
         System.out.println("(Press Enter to skip any criteria)");
+        System.out.println("\n⚠️ Note: Layovers follow our policy:");
+        System.out.println("- Daytime (08:00–17:00): max 2 hours");
+        System.out.println("- After-hours (<08:00 or >17:00): max 30 minutes");
+
 
         SearchCriteria criteria = new SearchCriteria();
 
@@ -238,7 +261,23 @@ private static void registerClients(Scanner scanner, ClientService clientService
             for (int i = 0; i < connections.size(); i++) {
                 System.out.println((i + 1) + ". " + connections.get(i));
             }
+   /**      
+     // --- DEBUG: Print layovers for this connection ---
+RouteConnection chosenConn = connections.get(0); // first connection
+List<Route> legs = chosenConn.getRoutes();
+System.out.println("Connection 1:");
+for (int j = 0; j < legs.size(); j++) {
+    Route leg = legs.get(j);
+    System.out.println("   Leg " + (j + 1) + ": " + leg.getDepartureCity() + " -> " + leg.getArrivalCity() +
+            ", Dep=" + leg.getDepartureTime() + ", Arr=" + leg.getArrivalTime());
 
+    if (j < legs.size() - 1) {
+        int layover = TimeUtils.getLayoverMinutes(leg.getArrivalTime(), legs.get(j + 1).getDepartureTime());
+        System.out.println("      Layover before next leg: " + layover + " minutes");
+    }
+}
+*/
+        
             System.out.print("\nSelect a connection to book (number) or press Enter to return: ");
             String selection = scanner.nextLine().trim();
             if (!selection.isEmpty()) {

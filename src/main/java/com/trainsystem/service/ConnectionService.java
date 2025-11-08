@@ -1,19 +1,15 @@
 package com.trainsystem.service;
 
-import com.trainsystem.repository.ClientRepository;
 import com.trainsystem.repository.RouteRepository;
 import com.trainsystem.model.Route;
 import com.trainsystem.model.RouteConnection;
 import com.trainsystem.model.SearchCriteria;
-import com.trainsystem.repository.TicketRepository;
-import com.trainsystem.repository.TripRepository;
-import com.trainsystem.util.CsvLoader;
 import com.trainsystem.dto.SearchResultDTO;
+import com.trainsystem.util.TimeUtils;
 
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.io.InputStream;
-
 
 public class ConnectionService {
 
@@ -23,12 +19,10 @@ public class ConnectionService {
 
     private ConnectionService(RouteRepository routeRepository) {
         this.routeRepository = routeRepository;
-           // Load CSV from resources
+
+        // Load CSV from resources (optional if you still need it)
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("routes.csv")) {
-            if (is == null) {
-                System.err.println("routes.csv not found in resources!");
-            } else {
-                CsvLoader.load(is, routeRepository);
+            if (is != null) {
                 System.out.println("Routes loaded: " + routeRepository.size());
             }
         } catch (Exception e) {
@@ -44,18 +38,18 @@ public class ConnectionService {
     }
 
     public SearchResultDTO searchConnections(SearchCriteria criteria) {
-        List<RouteConnection> connections = new ArrayList<>(routeRepository.findDirectConnections(
+        // Fetch all connections
+        List<RouteConnection> connections = routeRepository.findAllConnections(
                 criteria.getDepartureCity(),
                 criteria.getArrivalCity()
-        ));
+        );
 
-        if (connections.isEmpty()) {
-            connections.addAll(routeRepository.find1StopConnections(criteria.getDepartureCity(), criteria.getArrivalCity()));
-            connections.addAll(routeRepository.find2StopConnections(criteria.getDepartureCity(), criteria.getArrivalCity()));
-        }
-
+        // Filter connections according to criteria
         connections = filterConnections(connections, criteria);
+
+        // Sort connections based on sort option
         connections = sortConnections(connections, criteria.getSortOption());
+
         String searchId = UUID.randomUUID().toString();
         searchCache.put(searchId, connections);
 
@@ -65,22 +59,41 @@ public class ConnectionService {
     private List<RouteConnection> filterConnections(List<RouteConnection> connections, SearchCriteria criteria) {
         return connections.stream()
                 .filter(conn -> {
+                    // Train type filter
                     if (criteria.getTrainType() != null && !criteria.getTrainType().isBlank()) {
                         boolean anyMatch = conn.getRoutes().stream()
-                                .anyMatch(route -> route.getTrainType().name().equalsIgnoreCase(criteria.getTrainType()));
+                                .anyMatch(r -> r.getTrainType().name().equalsIgnoreCase(criteria.getTrainType()));
                         if (!anyMatch) return false;
                     }
 
+                    // First class price filter
                     if (criteria.getFirstClassPrice() > 0) {
                         boolean allUnder = conn.getRoutes().stream()
                                 .allMatch(r -> r.getFirstClassPrice() <= criteria.getFirstClassPrice());
                         if (!allUnder) return false;
                     }
 
+                    // Second class price filter
                     if (criteria.getSecondClassPrice() > 0) {
                         boolean allUnder = conn.getRoutes().stream()
                                 .allMatch(r -> r.getSecondClassPrice() <= criteria.getSecondClassPrice());
                         if (!allUnder) return false;
+                    }
+
+                    // Departure time filter
+                    if (criteria.getDepartureTime() != null && !criteria.getDepartureTime().isBlank()) {
+                        String dep = conn.getRoutes().get(0).getDepartureTime();
+                        if (!TimeUtils.isWithin(dep, criteria.getDepartureTime(), criteria.getArrivalTime())) {
+                            return false;
+                        }
+                    }
+
+                    // Arrival time filter
+                    if (criteria.getArrivalTime() != null && !criteria.getArrivalTime().isBlank()) {
+                        String arr = conn.getRoutes().get(conn.getRoutes().size() - 1).getArrivalTime();
+                        if (!TimeUtils.isWithin(arr, criteria.getDepartureTime(), criteria.getArrivalTime())) {
+                            return false;
+                        }
                     }
 
                     return true;
@@ -92,19 +105,19 @@ public class ConnectionService {
         if (sortOption == null || connections.isEmpty()) return connections;
 
         switch (sortOption.toUpperCase()) {
-            case "B":
+            case "B": // Duration
                 connections.sort(Comparator.comparingInt(this::getTotalDuration));
                 break;
-            case "C":
+            case "C": // First class price low→high
                 connections.sort(Comparator.comparingDouble(this::getTotalFirstClassPrice));
                 break;
-            case "D":
+            case "D": // First class price high→low
                 connections.sort(Comparator.comparingDouble(this::getTotalFirstClassPrice).reversed());
                 break;
-            case "E":
+            case "E": // Second class price low→high
                 connections.sort(Comparator.comparingDouble(this::getTotalSecondClassPrice));
                 break;
-            case "F":
+            case "F": // Second class price high→low
                 connections.sort(Comparator.comparingDouble(this::getTotalSecondClassPrice).reversed());
                 break;
         }
@@ -117,7 +130,7 @@ public class ConnectionService {
         for (int i = 0; i < routes.size(); i++) {
             total += routes.get(i).getTripDurationMinutes();
             if (i < routes.size() - 1) {
-                total += com.trainsystem.util.TimeUtils.getDurationMinutes(
+                total += TimeUtils.getDurationMinutes(
                         routes.get(i).getArrivalTime(), routes.get(i + 1).getDepartureTime()
                 );
             }
