@@ -9,7 +9,7 @@ import com.trainsystem.repository.ClientRepository;
 import com.trainsystem.service.ClientService;
 import com.trainsystem.service.ConnectionService;
 import com.trainsystem.service.TripService;
-import com.trainsystem.db.DbInitializer;
+import com.trainsystem.service.DbInitializer;
 import com.trainsystem.model.Route;
 import com.trainsystem.util.TimeUtils;
 

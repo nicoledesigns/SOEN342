@@ -41,7 +41,7 @@ public class TripRepository {
             saveTripToDb(trip);
         }
     }
-    
+
     //before history
     public List<Trip> getAllTrips() {
         return trips;

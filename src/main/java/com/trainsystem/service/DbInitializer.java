@@ -1,4 +1,4 @@
-package com.trainsystem.db;
+package com.trainsystem.service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

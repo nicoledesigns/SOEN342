@@ -63,36 +63,48 @@ public class TripService {
         return true;
     }
 
-    // ✅ New clean version
     public List<Ticket> generateTrip(RouteConnection connection, List<Client> clients) {
         List<Ticket> allTickets = new ArrayList<>();
         LocalDate travelDate = connection.getTravelDate() != null ? connection.getTravelDate() : LocalDate.now();
-
+    
         // Create ONE trip for this booking
         String tripId = "TR" + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
         Trip trip = new Trip(tripId, travelDate, new ArrayList<>());
-        tripRepository.addTrip(trip);
-
-        // Insert TripRoute mappings
+    
+        // Generate tickets for each client and attach to the trip
+        for (Client client : clients) {
+            // Ensure client is logged in repository
+            if (clientRepository.findById(client.getId()) == null) {
+                logClient(client);
+            }
+    
+            for (Route route : connection.getRoutes()) {
+                // Create ticket and attach to client
+                Ticket ticket = new Ticket(tripId, route, client);
+                ticketRepository.addTicket(ticket);
+                client.addTicket(ticket);
+    
+                // Attach ticket to the trip immediately
+                trip.getTickets().add(ticket);
+    
+                // Keep track for return
+                allTickets.add(ticket);
+            }
+        }
+    
+        // Insert TripRoute mappings into DB
         List<Route> routes = connection.getRoutes();
         for (int i = 0; i < routes.size(); i++) {
             insertTripRoute(tripId, routes.get(i).getRouteId(), i + 1);
         }
-
-        // Generate a ticket per client per route
-        for (Client client : clients) {
-            logClient(client);
-            for (Route route : routes) {
-                Ticket ticket = new Ticket(tripId, route, client);
-                ticketRepository.addTicket(ticket);
-                client.addTicket(ticket);
-                allTickets.add(ticket);
-            }
-        }
-
+    
+        // Add the fully populated trip to the repository
+        tripRepository.addTrip(trip);
+    
         System.out.println("✅ Trip booked successfully with ID: " + tripId);
         return allTickets;
     }
+    
 
     private void insertTripRoute(String tripId, String routeId, int legOrder) {
         String sql = "INSERT INTO TripRoute(trip_id, route_id, leg_order) VALUES (?, ?, ?)";
