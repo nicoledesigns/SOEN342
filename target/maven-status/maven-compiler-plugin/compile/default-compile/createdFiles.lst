@@ -5,6 +5,7 @@ com/trainsystem/model/RouteConnection.class
 com/trainsystem/repository/TripRepository.class
 com/trainsystem/service/ClientService.class
 com/trainsystem/DbTest.class
+com/trainsystem/service/DbInitializer.class
 com/trainsystem/util/CsvLoader.class
 com/trainsystem/app/TrainApp.class
 com/trainsystem/service/ConnectionService.class
@@ -18,4 +19,3 @@ com/trainsystem/service/TripService.class
 com/trainsystem/util/TimeUtils.class
 com/trainsystem/model/Trip.class
 com/trainsystem/model/TrainType.class
-com/trainsystem/db/DbInitializer.class
