@@ -69,22 +69,22 @@ clientService = ClientService.getClientService();
 clientRepository = ClientRepository.getClientRepository();
 tripService = TripService.getTripService();
 System.out.println("Services initialized.");
- // ======== TEST LAYOUTS FOR TIMEUTILS & LAYOVER POLICY ========
-    System.out.println("\n=== TEST: Layover & Duration ===");
-    List<Route> testConnection = new ArrayList<>();
-    testConnection.add(new Route("R00007", "A Coruña", "Santiago de Compostela", "16:50", "20:08", null, "", 0, 0));
-    testConnection.add(new Route("R00008", "Santiago de Compostela", "Vigo", "21:00", "23:00", null, "", 0, 0));
-
-    TimeUtils.printConnection(testConnection);
-
-    int totalDuration = TimeUtils.getTripDuration(testConnection);
-    System.out.println("Total duration in minutes: " + totalDuration);
-
-    int layover = TimeUtils.getLayoverMinutes(
-            testConnection.get(0).getArrivalTime(),
-            testConnection.get(1).getDepartureTime()
-    );
-    System.out.println("Layover in minutes: " + layover);
+// // ======== TEST LAYOUTS FOR TIMEUTILS & LAYOVER POLICY ========
+//    System.out.println("\n=== TEST: Layover & Duration ===");
+//    List<Route> testConnection = new ArrayList<>();
+//    testConnection.add(new Route("R00007", "A Coruña", "Santiago de Compostela", "16:50", "20:08", null, "", 0, 0));
+//    testConnection.add(new Route("R00008", "Santiago de Compostela", "Vigo", "21:00", "23:00", null, "", 0, 0));
+//
+//    TimeUtils.printConnection(testConnection);
+//
+//    int totalDuration = TimeUtils.getTripDuration(testConnection);
+//    System.out.println("Total duration in minutes: " + totalDuration);
+//
+//    int layover = TimeUtils.getLayoverMinutes(
+//            testConnection.get(0).getArrivalTime(),
+//            testConnection.get(1).getDepartureTime()
+//    );
+//    System.out.println("Layover in minutes: " + layover);
 
 
         Scanner scanner = new Scanner(System.in);
